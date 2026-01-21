@@ -1,0 +1,24 @@
+{
+  "name": "rowing-training-platform",
+  "version": "1.0.0",
+  "description": "A professional rowing training management platform with data visualization",
+  "scripts": {
+    "dev": "wrangler pages dev ./public -- d1=DB:rowing-db --port=8788",
+    "deploy": "wrangler pages deploy ./public",
+    "db:execute": "wrangler d1 execute rowing-db --remote --file=./schema.sql",
+    "db:migrate": "wrangler d1 execute rowing-db --local --file=./schema.sql"
+  },
+  "keywords": [
+    "rowing",
+    "training",
+    "sports",
+    "visualization",
+    "cloudflare-pages",
+    "cloudflare-d1"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}

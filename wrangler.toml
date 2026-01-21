@@ -1,0 +1,7 @@
+name = "saitingdui"
+pages_build_output_dir = "public"
+
+[[d1_databases]]
+binding = "DB" # This refers to 'context.env.DB' in your code
+database_name = "rowing-db"
+database_id = "ea852d86-deb1-441c-b65e-e6a73136075b"

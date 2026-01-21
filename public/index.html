@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rowing Training Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen text-gray-900 font-sans antialiased">
+
+    <!-- Auth Screen -->
+    <div id="authScreen" class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-gray-900 mb-2" data-i18n="welcomeBack">Welcome Back</h1>
+                <p class="text-sm text-gray-600" data-i18n="platformName">Rowing Training Platform</p>
+            </div>
+
+            <div id="loginBox">
+                <form id="loginForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                        <input type="text" id="loginUsername" required 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition"
+                            placeholder="Enter username">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <input type="password" id="loginPassword" required 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition"
+                            placeholder="Enter password">
+                    </div>
+                    <button type="submit" 
+                        class="w-full bg-gray-900 text-white py-2.5 rounded-lg font-medium hover:bg-gray-800 transition" data-i18n="login">
+                        Login
+                    </button>
+                </form>
+                <div class="mt-4 text-center">
+                    <button onclick="toggleAuth('register')" class="text-gray-600 text-sm hover:text-gray-900 transition" data-i18n="dontHaveAccount">
+                        Don't have an account? Sign up
+                    </button>
+                </div>
+            </div>
+
+            <div id="registerBox" class="hidden">
+                <form id="registerForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                        <input type="text" id="regUsername" required 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition"
+                            placeholder="Enter username">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <input type="password" id="regPassword" required 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition"
+                            placeholder="Enter password">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                        <input type="text" id="regName" required 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition"
+                            placeholder="Enter your name">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" id="regEmail" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition"
+                            placeholder="Enter email (optional)">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                        <select id="regRole" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition">
+                            <option value="athlete">Athlete</option>
+                            <option value="coach">Coach</option>
+                        </select>
+                    </div>
+                    <button type="submit" 
+                        class="w-full bg-gray-900 text-white py-2.5 rounded-lg font-medium hover:bg-gray-800 transition" data-i18n="signup">
+                        Sign Up
+                    </button>
+                </form>
+                <div class="mt-4 text-center">
+                    <button onclick="toggleAuth('login')" class="text-gray-600 text-sm hover:text-gray-900 transition" data-i18n="alreadyHaveAccount">
+                        Already have an account? Login
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            
+            <!-- Header -->
+            <header class="bg-white rounded-lg shadow-sm p-4 mb-6 flex items-center justify-between">
+                <h1 class="text-xl font-bold text-gray-900" data-i18n="title">Rowing Training Platform</h1>
+                <div class="flex items-center gap-4">
+                    <button onclick="toggleLanguage()" class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition">
+                        <span id="langToggle">中文</span>
+                    </button>
+                    <span id="userName" class="text-sm font-medium text-gray-700"></span>
+                    <span id="userRole" class="px-3 py-1 text-xs font-medium rounded-full"></span>
+                    <button onclick="logout()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition">
+                        <span data-i18n="logout">Logout</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Navigation -->
+            <nav class="bg-white rounded-lg shadow-sm p-1 mb-6">
+                <ul class="flex gap-1 flex-wrap">
+                    <li><button onclick="showSection('dashboard')" class="nav-btn active px-4 py-2 rounded-md text-sm font-medium" data-i18n="dashboard">Dashboard</button></li>
+                    <li><button onclick="showSection('training')" class="nav-btn px-4 py-2 rounded-md text-sm font-medium" data-i18n="training">Training</button></li>
+                    <li><button onclick="showSection('strength')" class="nav-btn px-4 py-2 rounded-md text-sm font-medium" data-i18n="strength">Strength</button></li>
+                    <li><button onclick="showSection('leaderboard')" class="nav-btn px-4 py-2 rounded-md text-sm font-medium" data-i18n="leaderboard">Leaderboard</button></li>
+                    <li><button onclick="showSection('techniques')" class="nav-btn px-4 py-2 rounded-md text-sm font-medium" data-i18n="techniques">Techniques</button></li>
+                    <li><button onclick="showSection('plans')" id="plansBtn" class="nav-btn px-4 py-2 rounded-md text-sm font-medium hidden" data-i18n="plans">Plans</button></li>
+                </ul>
+            </nav>
+
+            <!-- Content Area -->
+            <div class="bg-white rounded-lg shadow-sm p-6 min-h-[600px]">
+                
+                <!-- Dashboard Section -->
+                <div id="dashboard" class="section">
+                    <h2 class="text-lg font-bold text-gray-900 mb-6" data-i18n="overview">Overview</h2>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                        <div class="bg-gray-50 rounded-lg p-5">
+                            <h3 class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2" data-i18n="monthlySessions">Monthly Sessions</h3>
+                            <div class="text-3xl font-bold text-gray-900" id="totalSessions">0</div>
+                            <div class="text-xs text-green-600 mt-1" id="sessionsTrend">Up 15% from last month</div>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-5">
+                            <h3 class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2" data-i18n="totalDistance">Total Distance (m)</h3>
+                            <div class="text-3xl font-bold text-gray-900" id="totalDistance">0</div>
+                            <div class="text-xs text-green-600 mt-1" id="distanceTrend">Up 23% from last month</div>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-5">
+                            <h3 class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2" data-i18n="avgPower">Avg Power (W)</h3>
+                            <div class="text-3xl font-bold text-gray-900" id="avgPower">0</div>
+                            <div class="text-xs text-green-600 mt-1" id="powerTrend">Up 8% from last month</div>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-5">
+                            <h3 class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2" data-i18n="avgHeartRate">Avg Heart Rate</h3>
+                            <div class="text-3xl font-bold text-gray-900" id="avgHeartRate">0</div>
+                            <div class="text-xs text-red-600 mt-1" id="hrTrend">Down 5% from last month</div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-gray-50 rounded-lg p-5">
+                            <h3 class="text-sm font-semibold text-gray-900 mb-4" data-i18n="powerTrend">Power Trend</h3>
+                            <div id="powerChart" style="width: 100%; height: 320px;"></div>
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-5">
+                            <h3 class="text-sm font-semibold text-gray-900 mb-4" data-i18n="hrTrend">Heart Rate Trend</h3>
+                            <div id="heartRateChart" style="width: 100%; height: 320px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Training Section -->
+                <div id="training" class="section hidden">
+                    <h2 class="text-lg font-bold text-gray-900 mb-6" data-i18n="trainingRecords">Training Records</h2>
+                    <button onclick="showAddTrainingModal()" class="mb-6 px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition" data-i18n="addTraining">
+                        Add Training Record
+                    </button>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="px-4 py-3 font-medium text-gray-700">Date</th>
+                                    <th class="px-4 py-3 font-medium text-gray-700">Type</th>
+                                    <th class="px-4 py-3 font-medium text-gray-700">Duration (min)</th>
+                                    <th class="px-4 py-3 font-medium text-gray-700">Distance (m)</th>
+                                    <th class="px-4 py-3 font-medium text-gray-700">Power (W)</th>
+                                    <th class="px-4 py-3 font-medium text-gray-700">HR (BPM)</th>
+                                    <th class="px-4 py-3 font-medium text-gray-700">Rating</th>
+                                    <th class="px-4 py-3 font-medium text-gray-700">Feedback</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trainingTableBody" class="divide-y divide-gray-200"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Strength Section -->
+                <div id="strength" class="section hidden">
+                    <h2 class="text-lg font-bold text-gray-900 mb-6" data-i18n="strengthTraining">Strength Training</h2>
+                    <button onclick="showAddStrengthModal()" class="mb-6 px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition" data-i18n="addStrength">
+                        Add Strength Record
+                    </button>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="px-4 py-3 font-medium text-gray-700">Date</th>
+                                    <th class="px-4 py-3 font-medium text-gray-700">Exercise</th>
+                                    <th class="px-4 py-3 font-medium text-gray-700">Sets</th>
+                                    <th class="px-4 py-3 font-medium text-gray-700">Reps</th>
+                                    <th class="px-4 py-3 font-medium text-gray-700">Weight (kg)</th>
+                                    <th class="px-4 py-3 font-medium text-gray-700">Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="strengthTableBody" class="divide-y divide-gray-200"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Leaderboard Section -->
+                <div id="leaderboard" class="section hidden">
+                    <h2 class="text-lg font-bold text-gray-900 mb-6" data-i18n="leaderboard">Leaderboard</h2>
+                    <div class="mb-6">
+                        <select id="leaderboardCategory" onchange="loadLeaderboard()" 
+                            class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
+                            <option value="daily_distance" data-i18n="dailyDistance">Daily Distance</option>
+                            <option value="monthly_distance" data-i18n="monthlyDistance">Monthly Distance</option>
+                            <option value="500m" data-i18n="test500m">500m Test</option>
+                            <option value="2km" data-i18n="test2km">2km Test</option>
+                            <option value="5km" data-i18n="test5km">5km Test</option>
+                        </select>
+                    </div>
+                    <div id="leaderboardList" class="space-y-2"></div>
+                </div>
+
+                <!-- Techniques Section -->
+                <div id="techniques" class="section hidden">
+                    <h2 class="text-lg font-bold text-gray-900 mb-6" data-i18n="techniqueLibrary">Technique Library</h2>
+                    <div id="techniqueList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                </div>
+
+                <!-- Plans Section -->
+                <div id="plans" class="section hidden">
+                    <h2 class="text-lg font-bold text-gray-900 mb-6" data-i18n="trainingPlans">Training Plans</h2>
+                    <button onclick="showAddPlanModal()" class="mb-6 px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition" data-i18n="createPlan">
+                        Create New Plan
+                    </button>
+                    <div id="plansList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Training Modal -->
+    <div id="addTrainingModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200 flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-gray-900" data-i18n="addTraining">Add Training Record</h3>
+                <button onclick="closeModal('addTrainingModal')" class="text-gray-400 hover:text-gray-900 text-2xl">&times;</button>
+            </div>
+            <form id="trainingForm" class="p-6 space-y-4">
+                <div id="studentSelector" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Student</label>
+                    <select id="trainingStudentId" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
+                        <option value="">Select a student</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                    <input type="date" id="trainingDate" required 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                    <select id="trainingType" required 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
+                        <option value="water">Water</option>
+                        <option value="ergometer">Ergometer</option>
+                        <option value="strength">Strength</option>
+                        <option value="technique">Technique</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Duration (min)</label>
+                    <input type="number" id="trainingDuration" required placeholder="Enter duration"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Distance (m)</label>
+                    <input type="number" id="trainingDistance" placeholder="Enter distance"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Split (s/500m)</label>
+                    <input type="number" id="trainingSplit" step="0.1" placeholder="Enter split"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Avg Power (W)</label>
+                    <input type="number" id="trainingPower" placeholder="Enter power"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Avg HR (BPM)</label>
+                    <input type="number" id="trainingAvgHR" placeholder="Enter heart rate"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Max HR (BPM)</label>
+                    <input type="number" id="trainingMaxHR" placeholder="Enter max heart rate"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Stroke Rate</label>
+                    <input type="number" id="trainingSR" placeholder="Enter stroke rate"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                    <textarea id="trainingNotes" rows="3" placeholder="Enter notes"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none resize-none"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-gray-900 text-white py-2.5 rounded-lg font-medium hover:bg-gray-800 transition" data-i18n="submit">
+                    Submit
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Strength Modal -->
+    <div id="addStrengthModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200 flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-gray-900" data-i18n="addStrength">Add Strength Record</h3>
+                <button onclick="closeModal('addStrengthModal')" class="text-gray-400 hover:text-gray-900 text-2xl">&times;</button>
+            </div>
+            <form id="strengthForm" class="p-6 space-y-4">
+                <div id="studentSelectorStrength" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Student</label>
+                    <select id="strengthStudentId" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
+                        <option value="">Select a student</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                    <input type="date" id="strengthDate" required 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Exercise Name</label>
+                    <input type="text" id="strengthExercise" required placeholder="Enter exercise name"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Sets</label>
+                    <input type="number" id="strengthSets" required placeholder="Enter sets"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Reps</label>
+                    <input type="number" id="strengthReps" required placeholder="Enter reps"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Weight (kg)</label>
+                    <input type="number" id="strengthWeight" required placeholder="Enter weight"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                    <textarea id="strengthNotes" rows="3" placeholder="Enter notes"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none resize-none"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-gray-900 text-white py-2.5 rounded-lg font-medium hover:bg-gray-800 transition" data-i18n="submit">
+                    Submit
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .nav-btn {
+            background-color: transparent;
+            color: #374151;
+            transition: all 0.2s;
+        }
+        .nav-btn:hover {
+            background-color: #f3f4f6;
+        }
+        .nav-btn.active {
+            background-color: #111827;
+            color: #ffffff;
+        }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
+        .badge-coach {
+            background-color: #111827;
+            color: white;
+        }
+        .badge-athlete {
+            background-color: #6b7280;
+            color: white;
+        }
+        .rank {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            background-color: #111827;
+            color: white;
+        }
+        .rank.gold {
+            background-color: #ca8a04;
+        }
+        .rank.silver {
+            background-color: #6b7280;
+        }
+        .rank.bronze {
+            background-color: #92400e;
+        }
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            background-color: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s;
+        }
+        .leaderboard-item:hover {
+            background-color: #ffffff;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+        .category-rowing {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        .category-strength {
+            background-color: #fce7f3;
+            color: #9d174d;
+        }
+        .technique-card {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.2s;
+        }
+        .technique-card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .feedback-box {
+            background-color: #fef3c7;
+            border-left: 3px solid #ca8a04;
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+        .feedback-box p {
+            color: #92400e;
+            font-style: italic;
+            margin-bottom: 4px;
+        }
+        .feedback-box .date {
+            color: #b45309;
+            font-size: 11px;
+        }
+    </style>
+
+    <script>
+        // Global state
+        let currentUser = null;
+        let powerChart = null;
+        let heartRateChart = null;
+        let currentLanguage = 'en'; // 'en' or 'zh'
+        
+        // Translations
+        const translations = {
+            en: {
+                title: 'Rowing Training Platform',
+                logout: 'Logout',
+                dashboard: 'Dashboard',
+                training: 'Training',
+                strength: 'Strength',
+                leaderboard: 'Leaderboard',
+                techniques: 'Techniques',
+                plans: 'Plans',
+                overview: 'Overview',
+                monthlySessions: 'Monthly Sessions',
+                totalDistance: 'Total Distance (m)',
+                avgPower: 'Avg Power (W)',
+                avgHeartRate: 'Avg Heart Rate',
+                powerTrend: 'Power Trend',
+                hrTrend: 'Heart Rate Trend',
+                hrDistribution: 'Heart Rate Distribution',
+                trainingRecords: 'Training Records',
+                addTraining: 'Add Training Record',
+                strengthTraining: 'Strength Training',
+                addStrength: 'Add Strength Record',
+                welcomeBack: 'Welcome Back',
+                platformName: 'Rowing Training Platform',
+                username: 'Username',
+                password: 'Password',
+                login: 'Login',
+                signup: 'Sign Up',
+                name: 'Name',
+                email: 'Email',
+                role: 'Role',
+                athlete: 'Athlete',
+                coach: 'Coach',
+                date: 'Date',
+                type: 'Type',
+                duration: 'Duration (min)',
+                distance: 'Distance (m)',
+                power: 'Power (W)',
+                hr: 'HR (BPM)',
+                rating: 'Rating',
+                feedback: 'Feedback',
+                exercise: 'Exercise',
+                sets: 'Sets',
+                reps: 'Reps',
+                weight: 'Weight (kg)',
+                notes: 'Notes',
+                submit: 'Submit',
+                student: 'Student',
+                selectStudent: 'Select a student',
+                dailyDistance: 'Daily Distance',
+                monthlyDistance: 'Monthly Distance',
+                test500m: '500m Test',
+                test2km: '2km Test',
+                test5km: '5km Test',
+                techniqueLibrary: 'Technique Library',
+                trainingPlans: 'Training Plans',
+                createPlan: 'Create New Plan',
+                difficulty: 'Difficulty',
+                rowing: 'Rowing',
+                noDataAvailable: 'No data available',
+                addRecordsToSeeCharts: 'Add training records to see charts',
+                noHeartRateData: 'No heart rate data',
+                addHeartRateValues: 'Add training records with heart rate values',
+                welcome: 'Welcome',
+                register: 'Register',
+                login: 'Login',
+                alreadyHaveAccount: 'Already have an account? Login',
+                dontHaveAccount: "Don't have an account? Sign up",
+                registrationSuccess: 'Registration successful! Please login',
+                trainingAdded: 'Training record added successfully!',
+                strengthAdded: 'Strength record added successfully!'
+            },
+            zh: {
+                title: '赛艇训练平台',
+                logout: '退出登录',
+                dashboard: '仪表板',
+                training: '训练记录',
+                strength: '力量训练',
+                leaderboard: '排行榜',
+                techniques: '技术库',
+                plans: '训练计划',
+                overview: '概览',
+                monthlySessions: '本月训练次数',
+                totalDistance: '总距离 (米)',
+                avgPower: '平均功率 (瓦)',
+                avgHeartRate: '平均心率',
+                powerTrend: '功率趋势',
+                hrTrend: '心率趋势',
+                hrDistribution: '心率分布',
+                trainingRecords: '训练记录',
+                addTraining: '添加训练记录',
+                strengthTraining: '力量训练',
+                addStrength: '添加力量记录',
+                welcomeBack: '欢迎回来',
+                platformName: '赛艇训练平台',
+                username: '用户名',
+                password: '密码',
+                login: '登录',
+                signup: '注册',
+                name: '姓名',
+                email: '邮箱',
+                role: '角色',
+                athlete: '运动员',
+                coach: '教练',
+                date: '日期',
+                type: '类型',
+                duration: '时长 (分钟)',
+                distance: '距离 (米)',
+                power: '功率 (瓦)',
+                hr: '心率 (BPM)',
+                rating: '评分',
+                feedback: '反馈',
+                exercise: '练习',
+                sets: '组数',
+                reps: '次数',
+                weight: '重量 (公斤)',
+                notes: '备注',
+                submit: '提交',
+                student: '学生',
+                selectStudent: '选择学生',
+                dailyDistance: '每日距离',
+                monthlyDistance: '本月距离',
+                test500m: '500米测试',
+                test2km: '2公里测试',
+                test5km: '5公里测试',
+                techniqueLibrary: '技术库',
+                trainingPlans: '训练计划',
+                createPlan: '创建新计划',
+                difficulty: '难度',
+                rowing: '划船',
+                noDataAvailable: '暂无数据',
+                addRecordsToSeeCharts: '添加训练记录以查看图表',
+                noHeartRateData: '暂无心率数据',
+                addHeartRateValues: '添加包含心率的训练记录',
+                welcome: '欢迎',
+                register: '注册',
+                login: '登录',
+                alreadyHaveAccount: '已有账户？登录',
+                dontHaveAccount: '没有账户？注册',
+                registrationSuccess: '注册成功！请登录',
+                trainingAdded: '训练记录添加成功！',
+                strengthAdded: '力量记录添加成功！'
+            }
+        };
+        
+        // Wait for ECharts to be available
+        function initChartsWhenReady() {
+            if (typeof echarts === 'undefined') {
+                console.log('Waiting for ECharts to load...');
+                setTimeout(initChartsWhenReady, 100);
+                return;
+            }
+            console.log('ECharts is ready!');
+        }
+        
+        // Start checking for ECharts
+        initChartsWhenReady();
+        
+        // Language toggle function
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'en' ? 'zh' : 'en';
+            document.getElementById('langToggle').textContent = currentLanguage === 'en' ? '中文' : 'English';
+            applyTranslations();
+        }
+        
+        // Apply translations to all elements with data-i18n attribute
+        function applyTranslations() {
+            const elements = document.querySelectorAll('[data-i18n]');
+            elements.forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLanguage][key]) {
+                    el.textContent = translations[currentLanguage][key];
+                }
+            });
+            
+            // Update placeholders
+            const placeholders = {
+                'loginUsername': translations[currentLanguage].username,
+                'loginPassword': translations[currentLanguage].password,
+                'regUsername': translations[currentLanguage].username,
+                'regPassword': translations[currentLanguage].password,
+                'regName': translations[currentLanguage].name,
+                'regEmail': translations[currentLanguage].email,
+                'trainingDuration': translations[currentLanguage].duration,
+                'trainingDistance': translations[currentLanguage].distance,
+                'trainingSplit': 'Split (s/500m)',
+                'trainingPower': translations[currentLanguage].power,
+                'trainingAvgHR': translations[currentLanguage].hr,
+                'trainingMaxHR': 'Max HR (BPM)',
+                'trainingSR': 'Stroke Rate',
+                'trainingNotes': translations[currentLanguage].notes,
+                'strengthExercise': translations[currentLanguage].exercise,
+                'strengthSets': translations[currentLanguage].sets,
+                'strengthReps': translations[currentLanguage].reps,
+                'strengthWeight': translations[currentLanguage].weight,
+                'strengthNotes': translations[currentLanguage].notes
+            };
+            
+            Object.entries(placeholders).forEach(([id, placeholder]) => {
+                const el = document.getElementById(id);
+                if (el) el.placeholder = placeholder;
+            });
+            
+            // Update labels
+            document.querySelectorAll('label').forEach(label => {
+                const input = label.querySelector('input, select, textarea');
+                if (input) {
+                    const key = input.id;
+                    const mapping = {
+                        'loginUsername': translations[currentLanguage].username,
+                        'loginPassword': translations[currentLanguage].password,
+                        'regUsername': translations[currentLanguage].username,
+                        'regPassword': translations[currentLanguage].password,
+                        'regName': translations[currentLanguage].name,
+                        'regEmail': translations[currentLanguage].email,
+                        'regRole': translations[currentLanguage].role,
+                        'trainingDate': translations[currentLanguage].date,
+                        'trainingType': translations[currentLanguage].type,
+                        'trainingDuration': translations[currentLanguage].duration,
+                        'trainingDistance': translations[currentLanguage].distance,
+                        'trainingSplit': 'Split (s/500m)',
+                        'trainingPower': translations[currentLanguage].power,
+                        'trainingAvgHR': translations[currentLanguage].hr,
+                        'trainingMaxHR': 'Max HR (BPM)',
+                        'trainingSR': 'Stroke Rate',
+                        'trainingNotes': translations[currentLanguage].notes,
+                        'strengthDate': translations[currentLanguage].date,
+                        'strengthExercise': translations[currentLanguage].exercise,
+                        'strengthSets': translations[currentLanguage].sets,
+                        'strengthReps': translations[currentLanguage].reps,
+                        'strengthWeight': translations[currentLanguage].weight,
+                        'strengthNotes': translations[currentLanguage].notes
+                    };
+                    if (mapping[key]) label.textContent = mapping[key];
+                }
+            });
+            
+            // Re-render charts to update chart text
+            if (currentUser) loadDashboard();
+        }
+
+        // Auth functions
+        function toggleAuth(type) {
+            document.getElementById('loginBox').classList.toggle('hidden', type !== 'login');
+            document.getElementById('registerBox').classList.toggle('hidden', type !== 'register');
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                currentUser = result.user;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                showMainApp();
+            } else {
+                alert(result.error || 'Login failed');
+            }
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                username: document.getElementById('regUsername').value,
+                password: document.getElementById('regPassword').value,
+                name: document.getElementById('regName').value,
+                email: document.getElementById('regEmail').value,
+                role: document.getElementById('regRole').value
+            };
+
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                alert('Registration successful! Please login');
+                toggleAuth('login');
+            } else {
+                alert(result.error || 'Registration failed');
+            }
+        });
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            document.getElementById('authScreen').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+        }
+
+        function showMainApp() {
+            document.getElementById('authScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('userName').textContent = currentUser.name;
+            document.getElementById('userRole').textContent = currentUser.role === 'coach' ? 'Coach' : 'Athlete';
+            document.getElementById('userRole').className = `px-3 py-1 text-xs font-medium rounded-full ${currentUser.role === 'coach' ? 'badge-coach' : 'badge-athlete'}`;
+            
+            if (currentUser.role === 'coach') {
+                document.getElementById('plansBtn').classList.remove('hidden');
+                loadStudents();
+            }
+
+            loadDashboard();
+            loadTechniques();
+        }
+
+        // Check if user is already logged in
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+            currentUser = JSON.parse(savedUser);
+            showMainApp();
+        }
+
+        // Navigation
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(sectionId).classList.add('active');
+            event.target.classList.add('active');
+
+            if (sectionId === 'dashboard') loadDashboard();
+            if (sectionId === 'training') loadTraining();
+            if (sectionId === 'strength') loadStrength();
+            if (sectionId === 'leaderboard') loadLeaderboard();
+        }
+
+        // Dashboard
+        async function loadDashboard() {
+            const response = await fetch(`/api/training?userId=${currentUser.id}`);
+            const sessions = await response.json();
+
+            const currentMonth = new Date().toISOString().slice(0, 7);
+            const lastMonth = new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().slice(0, 7);
+            
+            const thisMonthSessions = sessions.filter(s => s.date.startsWith(currentMonth));
+            const lastMonthSessions = sessions.filter(s => s.date.startsWith(lastMonth));
+            
+            const thisMonthCount = thisMonthSessions.length;
+            const lastMonthCount = lastMonthSessions.length;
+            
+            document.getElementById('totalSessions').textContent = thisMonthCount;
+            
+            const sessionTrend = calculateTrend(thisMonthCount, lastMonthCount);
+            document.getElementById('totalSessions').nextElementSibling.textContent = sessionTrend;
+            document.getElementById('totalSessions').nextElementSibling.className = `text-xs mt-1 ${sessionTrend.includes('Up') ? 'text-green-600' : 'text-red-600'}`;
+            
+            const thisMonthDistance = thisMonthSessions.reduce((sum, s) => sum + (s.distance || 0), 0);
+            const lastMonthDistance = lastMonthSessions.reduce((sum, s) => sum + (s.distance || 0), 0);
+            
+            document.getElementById('totalDistance').textContent = thisMonthDistance.toLocaleString();
+            
+            const distanceTrend = calculateTrend(thisMonthDistance, lastMonthDistance);
+            document.getElementById('totalDistance').nextElementSibling.textContent = distanceTrend;
+            document.getElementById('totalDistance').nextElementSibling.className = `text-xs mt-1 ${distanceTrend.includes('Up') ? 'text-green-600' : 'text-red-600'}`;
+            
+            const powerValues = thisMonthSessions.filter(s => s.avg_power).map(s => s.avg_power);
+            const avgPower = powerValues.length > 0 ? (powerValues.reduce((a, b) => a + b, 0) / powerValues.length).toFixed(0) : 0;
+            document.getElementById('avgPower').textContent = avgPower;
+
+            const lastMonthPowerValues = lastMonthSessions.filter(s => s.avg_power).map(s => s.avg_power);
+            const lastMonthAvgPower = lastMonthPowerValues.length > 0 ? (lastMonthPowerValues.reduce((a, b) => a + b, 0) / lastMonthPowerValues.length).toFixed(0) : 0;
+            
+            const powerTrend = calculateTrend(parseFloat(avgPower), parseFloat(lastMonthAvgPower));
+            document.getElementById('avgPower').nextElementSibling.textContent = powerTrend;
+            document.getElementById('avgPower').nextElementSibling.className = `text-xs mt-1 ${powerTrend.includes('Up') ? 'text-green-600' : 'text-red-600'}`;
+
+            const hrValues = thisMonthSessions.filter(s => s.avg_heart_rate).map(s => s.avg_heart_rate);
+            const avgHR = hrValues.length > 0 ? (hrValues.reduce((a, b) => a + b, 0) / hrValues.length).toFixed(0) : 0;
+            document.getElementById('avgHeartRate').textContent = avgHR;
+
+            const lastMonthHrValues = lastMonthSessions.filter(s => s.avg_heart_rate).map(s => s.avg_heart_rate);
+            const lastMonthAvgHR = lastMonthHrValues.length > 0 ? (lastMonthHrValues.reduce((a, b) => a + b, 0) / lastMonthHrValues.length).toFixed(0) : 0;
+            
+            const hrTrend = calculateTrend(parseFloat(lastMonthAvgHR), parseFloat(avgHR));
+            document.getElementById('avgHeartRate').nextElementSibling.textContent = hrTrend;
+            document.getElementById('avgHeartRate').nextElementSibling.className = `text-xs mt-1 ${hrTrend.includes('Up') ? 'text-red-600' : 'text-green-600'}`;
+
+            updateCharts(sessions);
+        }
+
+        function calculateTrend(current, previous) {
+            if (previous === 0) {
+                return current > 0 ? 'Up 100% from last month' : 'No change from last month';
+            }
+            const change = ((current - previous) / previous * 100).toFixed(0);
+            if (change > 0) {
+                return `Up ${change}% from last month`;
+            } else if (change < 0) {
+                return `Down ${Math.abs(change)}% from last month`;
+            }
+            return 'No change from last month';
+        }
+
+        function updateCharts(sessions) {
+            console.log('Updating charts with', sessions.length, 'sessions');
+            console.log('Session data sample:', sessions.slice(0, 2));
+            console.log('Sessions with HR data:', sessions.filter(s => s.avg_heart_rate));
+            console.log('All sessions HR values:', sessions.map(s => ({ date: s.date, hr: s.avg_heart_rate })));
+            
+            // Power Chart
+            const powerContainer = document.getElementById('powerChart');
+            if (!powerContainer) {
+                console.error('Power chart container not found');
+                return;
+            }
+            
+            if (powerChart) {
+                powerChart.dispose();
+            }
+            
+            powerChart = echarts.init(powerContainer);
+            console.log('Power chart initialized');
+            
+            if (sessions.length > 0) {
+                const dates = sessions.slice(0, 20).reverse().map(s => s.date.slice(5));
+                const powers = sessions.slice(0, 20).reverse().map(s => s.avg_power || 0);
+                
+                powerChart.setOption({
+                    tooltip: { trigger: 'axis' },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    xAxis: { 
+                        type: 'category',
+                        data: dates,
+                        axisLine: { lineStyle: { color: '#e5e7eb' } },
+                        axisLabel: { color: '#6b7280' }
+                    },
+                    yAxis: { 
+                        type: 'value',
+                        name: 'Power (W)',
+                        axisLine: { lineStyle: { color: '#e5e7eb' } },
+                        axisLabel: { color: '#6b7280' },
+                        splitLine: { lineStyle: { color: '#f3f4f6' } }
+                    },
+                    series: [{
+                        data: powers,
+                        type: 'line',
+                        smooth: true,
+                        lineStyle: { width: 2, color: '#111827' },
+                        areaStyle: { 
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: 'rgba(17, 24, 39, 0.2)' },
+                                { offset: 1, color: 'rgba(17, 24, 39, 0.02)' }
+                            ])
+                        },
+                        itemStyle: {
+                            color: '#111827',
+                            borderWidth: 1,
+                            borderColor: '#ffffff'
+                        }
+                    }]
+                });
+                console.log('Power chart updated with data');
+            } else {
+                powerChart.setOption({
+                    title: {
+                        text: 'No data available\nAdd training records to see charts',
+                        left: 'center',
+                        top: 'middle',
+                        textStyle: {
+                            color: '#9ca3af',
+                            fontSize: 14
+                        }
+                    }
+                });
+                console.log('Power chart updated with no data message');
+            }
+
+            // Heart Rate Chart
+            const hrContainer = document.getElementById('heartRateChart');
+            if (!hrContainer) {
+                console.error('Heart rate chart container not found');
+                return;
+            }
+            
+            if (heartRateChart) {
+                heartRateChart.dispose();
+            }
+            
+            heartRateChart = echarts.init(hrContainer);
+            console.log('Heart rate chart initialized');
+            
+            if (sessions.length > 0) {
+                const dates = sessions.slice(0, 20).reverse().map(s => s.date.slice(5));
+                const heartRates = sessions.slice(0, 20).reverse().map(s => s.avg_heart_rate || 0);
+                
+                heartRateChart.setOption({
+                    tooltip: { trigger: 'axis' },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    xAxis: { 
+                        type: 'category',
+                        data: dates,
+                        axisLine: { lineStyle: { color: '#e5e7eb' } },
+                        axisLabel: { color: '#6b7280' }
+                    },
+                    yAxis: { 
+                        type: 'value',
+                        name: 'Heart Rate (BPM)',
+                        axisLine: { lineStyle: { color: '#e5e7eb' } },
+                        axisLabel: { color: '#6b7280' },
+                        splitLine: { lineStyle: { color: '#f3f4f6' } }
+                    },
+                    series: [{
+                        data: heartRates,
+                        type: 'line',
+                        smooth: true,
+                        lineStyle: { width: 2, color: '#dc2626' },
+                        areaStyle: { 
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: 'rgba(220, 38, 38, 0.2)' },
+                                { offset: 1, color: 'rgba(220, 38, 38, 0.02)' }
+                            ])
+                        },
+                        itemStyle: {
+                            color: '#dc2626',
+                            borderWidth: 1,
+                            borderColor: '#ffffff'
+                        }
+                    }]
+                });
+                console.log('Heart rate chart updated with data');
+            } else {
+                heartRateChart.setOption({
+                    title: {
+                        text: translations[currentLanguage].noHeartRateData + '\n' + translations[currentLanguage].addHeartRateValues,
+                        left: 'center',
+                        top: 'middle',
+                        textStyle: {
+                            color: '#9ca3af',
+                            fontSize: 14
+                        }
+                    }
+                });
+                console.log('Heart rate chart updated with no data message');
+            }
+        }
+
+        // Training records
+        async function loadTraining() {
+            const response = await fetch(`/api/training?userId=${currentUser.id}`);
+            const sessions = await response.json();
+            
+            const tbody = document.getElementById('trainingTableBody');
+            tbody.innerHTML = sessions.map(s => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3">${s.date}</td>
+                    <td class="px-4 py-3">${s.type === 'water' ? 'Water' : s.type === 'ergometer' ? 'Ergometer' : s.type === 'strength' ? 'Strength' : 'Technique'}</td>
+                    <td class="px-4 py-3">${s.duration}</td>
+                    <td class="px-4 py-3">${s.distance || '-'}</td>
+                    <td class="px-4 py-3">${s.avg_power || '-'}</td>
+                    <td class="px-4 py-3">${s.avg_heart_rate || '-'}</td>
+                    <td class="px-4 py-3">${s.rating ? '★'.repeat(s.rating) : '-'}</td>
+                    <td class="px-4 py-3">${s.coach_feedback ? `<div class="feedback-box"><p>${s.coach_feedback}</p></div>` : '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Strength records
+        async function loadStrength() {
+            const response = await fetch(`/api/strength?userId=${currentUser.id}`);
+            const records = await response.json();
+            
+            const tbody = document.getElementById('strengthTableBody');
+            tbody.innerHTML = records.map(r => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3">${r.date}</td>
+                    <td class="px-4 py-3">${r.exercise_name}</td>
+                    <td class="px-4 py-3">${r.sets}</td>
+                    <td class="px-4 py-3">${r.reps}</td>
+                    <td class="px-4 py-3">${r.weight}</td>
+                    <td class="px-4 py-3">${r.notes || '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Leaderboard
+        async function loadLeaderboard() {
+            const category = document.getElementById('leaderboardCategory').value;
+            const response = await fetch(`/api/leaderboard?category=${category}`);
+            const leaderboard = await response.json();
+            
+            const list = document.getElementById('leaderboardList');
+            list.innerHTML = leaderboard.slice(0, 10).map((entry, index) => {
+                let rankClass = '';
+                if (index === 0) rankClass = 'gold';
+                else if (index === 1) rankClass = 'silver';
+                else if (index === 2) rankClass = 'bronze';
+                
+                return `
+                <div class="leaderboard-item">
+                    <div class="rank ${rankClass}">${index + 1}</div>
+                    <div class="flex-1">
+                        <div class="font-medium text-gray-900">${entry.user_name}</div>
+                    </div>
+                    <div class="font-bold text-gray-900">${category.includes('distance') ? entry.value.toFixed(0) + ' m' : entry.value.toFixed(1) + ' s'}</div>
+                </div>
+            `}).join('');
+        }
+
+        // Techniques (mock data)
+        function loadTechniques() {
+            const techniques = [
+                { title: 'Complete Stroke', category: 'rowing', desc: 'Complete stroke technique breakdown, master core power generation', difficulty: 3 },
+                { title: 'Catch Technique', category: 'rowing', desc: 'Efficient catch to reduce resistance, improve stroke efficiency', difficulty: 2 },
+                { title: 'Drive Phase', category: 'rowing', desc: 'Proper drive posture and sequence for maximum power output', difficulty: 4 },
+                { title: 'Recovery Phase', category: 'rowing', desc: 'Recovery relaxation and preparation for next stroke', difficulty: 2 },
+                { title: 'Squats', category: 'strength', desc: 'Core leg strength exercise for explosive power and endurance', difficulty: 3 },
+                { title: 'Deadlifts', category: 'strength', desc: 'Full-body strength training to strengthen posterior chain', difficulty: 4 },
+                { title: 'Pull-ups', category: 'strength', desc: 'Back and arm strength for improved rowing stability', difficulty: 3 },
+                { title: 'Core Training', category: 'strength', desc: 'Plank and core stability exercises for body coordination', difficulty: 2 },
+                { title: 'Boat Control', category: 'rowing', desc: 'Techniques to maintain boat stability and reduce drag', difficulty: 4 },
+                { title: 'Blade Entry', category: 'rowing', desc: 'Blade entry angle and timing for optimal efficiency', difficulty: 3 }
+            ];
+
+            const list = document.getElementById('techniqueList');
+            list.innerHTML = techniques.map(t => `
+                <div class="technique-card">
+                    <span class="inline-block px-3 py-1 text-xs font-medium rounded-full mb-3 ${t.category === 'rowing' ? 'category-rowing' : 'category-strength'}">
+                        ${t.category === 'rowing' ? 'Rowing' : 'Strength'}
+                    </span>
+                    <h3 class="font-semibold text-gray-900 mb-2">${t.title}</h3>
+                    <p class="text-sm text-gray-600 mb-3">${t.desc}</p>
+                    <div class="text-xs font-medium text-gray-500">Difficulty: ${'★'.repeat(t.difficulty)}</div>
+                </div>
+            `).join('');
+        }
+
+        // Global state for students
+        let studentsList = [];
+
+        // Modal functions
+        function showAddTrainingModal() {
+            document.getElementById('trainingDate').value = new Date().toISOString().split('T')[0];
+            
+            // Show student selector for coaches
+            if (currentUser.role === 'coach') {
+                const selector = document.getElementById('studentSelector');
+                const select = document.getElementById('trainingStudentId');
+                selector.classList.remove('hidden');
+                select.innerHTML = '<option value="">Select a student</option>' + 
+                    studentsList.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+            } else {
+                document.getElementById('studentSelector').classList.add('hidden');
+            }
+            
+            document.getElementById('addTrainingModal').classList.remove('hidden');
+        }
+
+        function showAddStrengthModal() {
+            document.getElementById('strengthDate').value = new Date().toISOString().split('T')[0];
+            
+            // Show student selector for coaches
+            if (currentUser.role === 'coach') {
+                const selector = document.getElementById('studentSelectorStrength');
+                const select = document.getElementById('strengthStudentId');
+                selector.classList.remove('hidden');
+                select.innerHTML = '<option value="">Select a student</option>' + 
+                    studentsList.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+            } else {
+                document.getElementById('studentSelectorStrength').classList.add('hidden');
+            }
+            
+            document.getElementById('addStrengthModal').classList.remove('hidden');
+        }
+
+        function showAddPlanModal() {
+            alert('Training Plans feature coming soon! This will allow coaches to create and assign training plans to students.');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        // Load students for coaches
+        async function loadStudents() {
+            if (currentUser.role !== 'coach') return;
+            
+            try {
+                // Get all training records to find student IDs
+                const response = await fetch('/api/training/all');
+                const result = await response.json();
+                
+                // Handle both array and object responses
+                let allSessions = [];
+                if (Array.isArray(result)) {
+                    allSessions = result;
+                } else if (result.error) {
+                    console.log('Could not load students:', result.error);
+                    return;
+                }
+                
+                // Extract unique student IDs
+                const studentIds = [...new Set(allSessions.map(s => s.user_id))];
+                
+                // Get user names for all students
+                studentsList = [];
+                for (const userId of studentIds) {
+                    if (userId !== currentUser.id) {
+                        // Try to get user info, fallback to ID
+                        try {
+                            const userResponse = await fetch(`/api/auth/user?id=${userId}`);
+                            const userData = await userResponse.json();
+                            studentsList.push({
+                                id: userId,
+                                name: userData.name || userData.username || `Student ${userId}`
+                            });
+                        } catch {
+                            studentsList.push({
+                                id: userId,
+                                name: `Student ${userId}`
+                            });
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log('Could not load students:', error);
+            }
+        }
+
+        // Form submissions
+        document.getElementById('trainingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const selectedStudentId = document.getElementById('trainingStudentId').value;
+            
+            const data = {
+                user_id: selectedStudentId || currentUser.id,
+                date: document.getElementById('trainingDate').value,
+                type: document.getElementById('trainingType').value,
+                duration: parseInt(document.getElementById('trainingDuration').value),
+                distance: parseFloat(document.getElementById('trainingDistance').value) || null,
+                split_time: parseFloat(document.getElementById('trainingSplit').value) || null,
+                avg_power: parseFloat(document.getElementById('trainingPower').value) || null,
+                avg_heart_rate: parseFloat(document.getElementById('trainingAvgHR').value) || null,
+                max_heart_rate: parseFloat(document.getElementById('trainingMaxHR').value) || null,
+                stroke_rate: parseFloat(document.getElementById('trainingSR').value) || null,
+                notes: document.getElementById('trainingNotes').value
+            };
+
+            console.log('Submitting training data:', data);
+
+            const response = await fetch('/api/training', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log('Training record saved:', result);
+                closeModal('addTrainingModal');
+                document.getElementById('trainingForm').reset();
+                
+                // Wait a moment then reload data
+                setTimeout(() => {
+                    loadDashboard();
+                    loadTraining();
+                    alert('Training record added successfully!');
+                }, 300);
+            } else {
+                console.error('Failed to save training record');
+                alert('Failed to save training record. Please try again.');
+            }
+        });
+
+        document.getElementById('strengthForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const selectedStudentId = document.getElementById('strengthStudentId').value;
+            
+            const data = {
+                user_id: selectedStudentId || currentUser.id,
+                date: document.getElementById('strengthDate').value,
+                exercise_name: document.getElementById('strengthExercise').value,
+                sets: parseInt(document.getElementById('strengthSets').value),
+                reps: parseInt(document.getElementById('strengthReps').value),
+                weight: parseFloat(document.getElementById('strengthWeight').value),
+                notes: document.getElementById('strengthNotes').value
+            };
+
+            const response = await fetch('/api/strength', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                closeModal('addStrengthModal');
+                document.getElementById('strengthForm').reset();
+                loadStrength();
+                alert('Strength record added successfully!');
+            }
+        });
+
+        // Resize charts on window resize
+        window.addEventListener('resize', () => {
+            if (powerChart) powerChart.resize();
+            if (heartRateChart) heartRateChart.resize();
+        });
+        
+        // Initialize charts when ECharts is loaded
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded, ECharts available:', typeof echarts !== 'undefined');
+        });
+    </script>
+</body>
+</html>
