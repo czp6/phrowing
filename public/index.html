@@ -540,7 +540,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Select Training Session</label>
                     <select id="videoSessionId" required
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
-                        <option value="">Select a training session</option>
+                        <option value="" disabled selected>Select a training session</option>
                     </select>
                 </div>
                 <div>
@@ -2212,7 +2212,7 @@
                     .then(response => response.json())
                     .then(sessions => {
                         const select = document.getElementById('videoSessionId');
-                        select.innerHTML = '<option value="">Select a training session</option>' + 
+                        select.innerHTML = '<option value="" disabled selected>Select a training session</option>' + 
                             sessions.map(s => `<option value="${s.id}">${s.date} - ${s.type} (${s.duration} min)</option>`).join('');
                     });
             }
