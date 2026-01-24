@@ -113,13 +113,24 @@
             
             <!-- Header -->
             <header class="bg-white rounded-lg shadow-sm p-4 mb-6 flex items-center justify-between">
-                <h1 class="text-xl font-bold text-gray-900" data-i18n="title">Rowing Training Platform</h1>
+                <div class="flex items-center gap-4">
+                    <div class="h-12 w-12 bg-blue-700 rounded-lg flex items-center justify-center">
+                        <span class="text-white text-xl font-bold">平</span>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900" data-i18n="title">Rowing Training Platform</h1>
+                        <p class="text-xs text-gray-500">Pinghe School</p>
+                    </div>
+                </div>
                 <div class="flex items-center gap-4">
                     <button onclick="toggleLanguage()" class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition">
                         <span id="langToggle">中文</span>
                     </button>
                     <span id="userName" class="text-sm font-medium text-gray-700"></span>
                     <span id="userRole" class="px-3 py-1 text-xs font-medium rounded-full"></span>
+                    <button onclick="showProfileModal()" class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition">
+                        <span data-i18n="myProfile">My Profile</span>
+                    </button>
                     <button onclick="logout()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition">
                         <span data-i18n="logout">Logout</span>
                     </button>
@@ -131,10 +142,12 @@
                 <ul class="flex gap-1 flex-wrap">
                     <li><button onclick="showSection('dashboard')" class="nav-btn active px-4 py-2 rounded-md text-sm font-medium" data-i18n="dashboard">Dashboard</button></li>
                     <li><button onclick="showSection('training')" class="nav-btn px-4 py-2 rounded-md text-sm font-medium" data-i18n="training">Training</button></li>
-                    <li><button onclick="showSection('strength')" class="nav-btn px-4 py-2 rounded-md text-sm font-medium" data-i18n="strength">Strength</button></li>
                     <li><button onclick="showSection('leaderboard')" class="nav-btn px-4 py-2 rounded-md text-sm font-medium" data-i18n="leaderboard">Leaderboard</button></li>
+                    <li><button onclick="showSection('growth')" class="nav-btn px-4 py-2 rounded-md text-sm font-medium" data-i18n="growth">Growth</button></li>
                     <li><button onclick="showSection('techniques')" class="nav-btn px-4 py-2 rounded-md text-sm font-medium" data-i18n="techniques">Techniques</button></li>
                     <li><button onclick="showSection('plans')" id="plansBtn" class="nav-btn px-4 py-2 rounded-md text-sm font-medium hidden" data-i18n="plans">Plans</button></li>
+                    <li><button onclick="showSection('students')" id="studentsBtn" class="nav-btn px-4 py-2 rounded-md text-sm font-medium hidden" data-i18n="students">Students</button></li>
+                    <li><button onclick="showSection('coaches')" id="coachesBtn" class="nav-btn px-4 py-2 rounded-md text-sm font-medium hidden" data-i18n="coaches">Coaches</button></li>
                 </ul>
             </nav>
 
@@ -183,21 +196,29 @@
                 <!-- Training Section -->
                 <div id="training" class="section hidden">
                     <h2 class="text-lg font-bold text-gray-900 mb-6" data-i18n="trainingRecords">Training Records</h2>
-                    <button onclick="showAddTrainingModal()" class="mb-6 px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition" data-i18n="addTraining">
-                        Add Training Record
-                    </button>
+                    <div class="mb-6 flex gap-2">
+                        <button onclick="showAddTrainingModal()" class="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition" data-i18n="addTraining">
+                            Add Training Record
+                        </button>
+                        <button onclick="showAddStrengthModal()" class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition">
+                            Add Strength Record
+                        </button>
+                        <button onclick="showVideoUploadModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition">
+                            📤 Upload Video
+                        </button>
+                    </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-left">
                             <thead>
                                 <tr class="bg-gray-50">
                                     <th class="px-4 py-3 font-medium text-gray-700">Date</th>
                                     <th class="px-4 py-3 font-medium text-gray-700">Type</th>
-                                    <th class="px-4 py-3 font-medium text-gray-700">Duration (min)</th>
-                                    <th class="px-4 py-3 font-medium text-gray-700">Distance (m)</th>
+                                    <th class="px-4 py-3 font-medium text-gray-700">Details</th>
                                     <th class="px-4 py-3 font-medium text-gray-700">Power (W)</th>
                                     <th class="px-4 py-3 font-medium text-gray-700">HR (BPM)</th>
                                     <th class="px-4 py-3 font-medium text-gray-700">Rating</th>
                                     <th class="px-4 py-3 font-medium text-gray-700">Feedback</th>
+                                    <th class="px-4 py-3 font-medium text-gray-700">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="trainingTableBody" class="divide-y divide-gray-200"></tbody>
@@ -234,7 +255,7 @@
                     <div class="mb-6">
                         <select id="leaderboardCategory" onchange="loadLeaderboard()" 
                             class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
-                            <option value="daily_distance" data-i18n="dailyDistance">Daily Distance</option>
+                            <option value="weekly_distance" data-i18n="weeklyDistance">Weekly Distance</option>
                             <option value="monthly_distance" data-i18n="monthlyDistance">Monthly Distance</option>
                             <option value="500m" data-i18n="test500m">500m Test</option>
                             <option value="2km" data-i18n="test2km">2km Test</option>
@@ -242,6 +263,30 @@
                         </select>
                     </div>
                     <div id="leaderboardList" class="space-y-2"></div>
+                </div>
+
+                <!-- Growth Curve Section -->
+                <div id="growth" class="section hidden">
+                    <h2 class="text-lg font-bold text-gray-900 mb-6" data-i18n="growthCurve">Growth Curve</h2>
+                    <div class="mb-6">
+                        <select id="growthMetric" onchange="loadGrowthCurve()" 
+                            class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
+                            <option value="power" data-i18n="power">Power</option>
+                            <option value="distance" data-i18n="distance">Distance</option>
+                            <option value="split" data-i18n="split">Split Time</option>
+                            <option value="heart_rate" data-i18n="heartRate">Heart Rate</option>
+                        </select>
+                    </div>
+                    <div class="mb-6">
+                        <select id="growthPeriod" onchange="loadGrowthCurve()" 
+                            class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
+                            <option value="7" data-i18n="last7Days">Last 7 Days</option>
+                            <option value="30" data-i18n="last30Days">Last 30 Days</option>
+                            <option value="90" data-i18n="last90Days">Last 90 Days</option>
+                            <option value="365" data-i18n="lastYear">Last Year</option>
+                        </select>
+                    </div>
+                    <div id="growthChart" style="width: 100%; height: 400px;"></div>
                 </div>
 
                 <!-- Techniques Section -->
@@ -257,6 +302,21 @@
                         Create New Plan
                     </button>
                     <div id="plansList"></div>
+                </div>
+
+                <!-- Students Section (Coach only) -->
+                <div id="students" class="section hidden">
+                    <h2 class="text-lg font-bold text-gray-900 mb-6" data-i18n="myStudents">My Students</h2>
+                    <button onclick="showAddStudentModal()" class="mb-6 px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition" data-i18n="addStudent">
+                        Add Student
+                    </button>
+                    <div id="studentsList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                </div>
+
+                <!-- Coaches Section (Athlete only) -->
+                <div id="coaches" class="section hidden">
+                    <h2 class="text-lg font-bold text-gray-900 mb-6" data-i18n="myCoaches">My Coaches</h2>
+                    <div id="coachesList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
                 </div>
             </div>
         </div>
@@ -339,6 +399,83 @@
         </div>
     </div>
 
+    <!-- Profile Modal -->
+    <div id="profileModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200 flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-gray-900" data-i18n="myProfile">My Profile</h3>
+                <button onclick="closeModal('profileModal')" class="text-gray-400 hover:text-gray-900 text-2xl">&times;</button>
+            </div>
+            <form id="profileForm" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                    <input type="text" id="profileUsername" readonly
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <input type="text" id="profileName" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" id="profileEmail"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                    <input type="tel" id="profilePhone"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Birth Date</label>
+                    <input type="date" id="profileBirthDate"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Height (cm)</label>
+                    <input type="number" id="profileHeight"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Weight (kg)</label>
+                    <input type="number" id="profileWeight"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
+                </div>
+                <button type="submit" class="w-full bg-gray-900 text-white py-2.5 rounded-lg font-medium hover:bg-gray-800 transition" data-i18n="submit">
+                    Save Changes
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Student Modal -->
+    <div id="addStudentModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200 flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-gray-900">Add Student</h3>
+                <button onclick="closeModal('addStudentModal')" class="text-gray-400 hover:text-gray-900 text-2xl">&times;</button>
+            </div>
+            <form id="addStudentForm" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Select Student</label>
+                    <select id="newStudentId" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
+                        <option value="">Select a student to add</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                    <textarea id="newStudentNotes" rows="3" placeholder="Add notes about this student (optional)"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none resize-none"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-gray-900 text-white py-2.5 rounded-lg font-medium hover:bg-gray-800 transition">
+                    Add Student
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- Add Strength Modal -->
     <div id="addStrengthModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
@@ -391,6 +528,133 @@
         </div>
     </div>
 
+    <!-- Video Upload Modal -->
+    <div id="videoUploadModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200 flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-gray-900">Upload Training Video</h3>
+                <button onclick="closeModal('videoUploadModal')" class="text-gray-400 hover:text-gray-900 text-2xl">&times;</button>
+            </div>
+            <form id="videoUploadForm" class="p-6 space-y-4">
+                <div id="videoStudentSelector" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Select Training Session</label>
+                    <select id="videoSessionId" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
+                        <option value="">Select a training session</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Video File</label>
+                    <input type="file" id="videoFile" required accept="video/*"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none">
+                    <p class="text-xs text-gray-500 mt-1">Supported formats: MP4, MOV, AVI, WebM (Max 100MB)</p>
+                </div>
+                <div id="uploadProgress" class="hidden">
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-2 text-center" id="uploadStatus">Uploading... 0%</p>
+                </div>
+                <button type="submit" id="uploadVideoBtn" class="w-full bg-gray-900 text-white py-2.5 rounded-lg font-medium hover:bg-gray-800 transition">
+                    Upload Video
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Session Details Modal -->
+    <div id="sessionDetailsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200 flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-gray-900">Training Session Details</h3>
+                <button onclick="closeModal('sessionDetailsModal')" class="text-gray-400 hover:text-gray-900 text-2xl">&times;</button>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h4 class="text-sm font-medium text-gray-700 mb-3">Basic Information</h4>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Date:</span>
+                                <span class="font-medium" id="detailDate">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Type:</span>
+                                <span class="font-medium" id="detailType">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Duration:</span>
+                                <span class="font-medium" id="detailDuration">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h4 class="text-sm font-medium text-gray-700 mb-3">Performance Metrics</h4>
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Distance:</span>
+                                <span class="font-medium" id="detailDistance">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Split:</span>
+                                <span class="font-medium" id="detailSplit">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Avg Power:</span>
+                                <span class="font-medium" id="detailPower">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Avg HR:</span>
+                                <span class="font-medium" id="detailAvgHR">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Max HR:</span>
+                                <span class="font-medium" id="detailMaxHR">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Stroke Rate:</span>
+                                <span class="font-medium" id="detailStrokeRate">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                    <h4 class="text-sm font-medium text-gray-700 mb-3">Performance Visualization</h4>
+                    <div id="sessionDetailChart" style="width: 100%; height: 300px;"></div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h4 class="text-sm font-medium text-gray-700 mb-3">Power Zones Distribution</h4>
+                        <div id="powerZonesChart" style="width: 100%; height: 250px;"></div>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h4 class="text-sm font-medium text-gray-700 mb-3">Heart Rate Zones</h4>
+                        <div id="hrZonesChart" style="width: 100%; height: 250px;"></div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                    <h4 class="text-sm font-medium text-gray-700 mb-3">Notes</h4>
+                    <p class="text-sm text-gray-700" id="detailNotes">No notes</p>
+                </div>
+
+                <div id="detailFeedbackSection" class="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+                    <h4 class="text-sm font-medium text-yellow-800 mb-2">Coach Feedback</h4>
+                    <p class="text-sm text-yellow-900" id="detailFeedback">No feedback yet</p>
+                </div>
+
+                <div id="detailVideoSection" class="mt-6 hidden">
+                    <h4 class="text-sm font-medium text-gray-700 mb-3">Training Video</h4>
+                    <video id="detailVideo" controls class="w-full rounded-lg" style="max-height: 400px;">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <style>
         .nav-btn {
             background-color: transparent;
@@ -401,7 +665,7 @@
             background-color: #f3f4f6;
         }
         .nav-btn.active {
-            background-color: #111827;
+            background-color: #1e40af;
             color: #ffffff;
         }
         .section {
@@ -411,7 +675,7 @@
             display: block;
         }
         .badge-coach {
-            background-color: #111827;
+            background-color: #1e40af;
             color: white;
         }
         .badge-athlete {
@@ -427,7 +691,7 @@
             justify-content: center;
             font-weight: bold;
             font-size: 16px;
-            background-color: #111827;
+            background-color: #1e40af;
             color: white;
         }
         .rank.gold {
@@ -544,7 +808,7 @@
                 submit: 'Submit',
                 student: 'Student',
                 selectStudent: 'Select a student',
-                dailyDistance: 'Daily Distance',
+                weeklyDistance: 'Weekly Distance',
                 monthlyDistance: 'Monthly Distance',
                 test500m: '500m Test',
                 test2km: '2km Test',
@@ -565,7 +829,17 @@
                 dontHaveAccount: "Don't have an account? Sign up",
                 registrationSuccess: 'Registration successful! Please login',
                 trainingAdded: 'Training record added successfully!',
-                strengthAdded: 'Strength record added successfully!'
+                strengthAdded: 'Strength record added successfully!',
+                growth: 'Growth',
+                growthCurve: 'Growth Curve',
+                power: 'Power',
+                distance: 'Distance',
+                split: 'Split Time',
+                heartRate: 'Heart Rate',
+                last7Days: 'Last 7 Days',
+                last30Days: 'Last 30 Days',
+                last90Days: 'Last 90 Days',
+                lastYear: 'Last Year'
             },
             zh: {
                 title: '赛艇训练平台',
@@ -615,7 +889,7 @@
                 submit: '提交',
                 student: '学生',
                 selectStudent: '选择学生',
-                dailyDistance: '每日距离',
+                weeklyDistance: '本周距离',
                 monthlyDistance: '本月距离',
                 test500m: '500米测试',
                 test2km: '2公里测试',
@@ -802,9 +1076,17 @@
             document.getElementById('userRole').textContent = currentUser.role === 'coach' ? 'Coach' : 'Athlete';
             document.getElementById('userRole').className = `px-3 py-1 text-xs font-medium rounded-full ${currentUser.role === 'coach' ? 'badge-coach' : 'badge-athlete'}`;
             
+            // Show/hide buttons based on role
             if (currentUser.role === 'coach') {
                 document.getElementById('plansBtn').classList.remove('hidden');
+                document.getElementById('studentsBtn').classList.remove('hidden');
+                document.getElementById('coachesBtn').classList.add('hidden');
                 loadStudents();
+            } else {
+                document.getElementById('plansBtn').classList.add('hidden');
+                document.getElementById('studentsBtn').classList.add('hidden');
+                document.getElementById('coachesBtn').classList.remove('hidden');
+                loadCoaches();
             }
 
             loadDashboard();
@@ -830,6 +1112,119 @@
             if (sectionId === 'training') loadTraining();
             if (sectionId === 'strength') loadStrength();
             if (sectionId === 'leaderboard') loadLeaderboard();
+            if (sectionId === 'growth') loadGrowthCurve();
+        }
+
+        // Growth Curve
+        let growthChart = null;
+
+        async function loadGrowthCurve() {
+            const metric = document.getElementById('growthMetric').value;
+            const period = parseInt(document.getElementById('growthPeriod').value);
+            
+            const response = await fetch(`/api/training?userId=${currentUser.id}`);
+            const sessions = await response.json();
+            
+            // Filter sessions by date period
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - period);
+            
+            const filteredSessions = sessions.filter(s => new Date(s.date) >= cutoffDate);
+            
+            // Sort by date
+            filteredSessions.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            const container = document.getElementById('growthChart');
+            if (!container) return;
+            
+            if (growthChart) {
+                growthChart.dispose();
+            }
+            
+            growthChart = echarts.init(container);
+            
+            if (filteredSessions.length > 0) {
+                const dates = filteredSessions.map(s => s.date.slice(5));
+                let values = [];
+                let yAxisName = '';
+                let seriesName = '';
+                let color = '';
+                
+                if (metric === 'power') {
+                    values = filteredSessions.map(s => s.avg_power || 0);
+                    yAxisName = 'Power (W)';
+                    seriesName = 'Power';
+                    color = '#111827';
+                } else if (metric === 'distance') {
+                    values = filteredSessions.map(s => s.distance || 0);
+                    yAxisName = 'Distance (m)';
+                    seriesName = 'Distance';
+                    color = '#2563eb';
+                } else if (metric === 'split') {
+                    values = filteredSessions.map(s => s.split_time || 0);
+                    yAxisName = 'Split (s/500m)';
+                    seriesName = 'Split Time';
+                    color = '#059669';
+                } else if (metric === 'heart_rate') {
+                    values = filteredSessions.map(s => s.avg_heart_rate || 0);
+                    yAxisName = 'Heart Rate (BPM)';
+                    seriesName = 'Heart Rate';
+                    color = '#dc2626';
+                }
+                
+                growthChart.setOption({
+                    tooltip: { trigger: 'axis' },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    xAxis: { 
+                        type: 'category',
+                        data: dates,
+                        axisLine: { lineStyle: { color: '#e5e7eb' } },
+                        axisLabel: { color: '#6b7280' }
+                    },
+                    yAxis: { 
+                        type: 'value',
+                        name: yAxisName,
+                        axisLine: { lineStyle: { color: '#e5e7eb' } },
+                        axisLabel: { color: '#6b7280' },
+                        splitLine: { lineStyle: { color: '#f3f4f6' } }
+                    },
+                    series: [{
+                        name: seriesName,
+                        data: values,
+                        type: 'line',
+                        smooth: true,
+                        lineStyle: { width: 2, color: color },
+                        areaStyle: { 
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: color.replace(')', ', 0.2)') },
+                                { offset: 1, color: color.replace(')', ', 0.02)') }
+                            ])
+                        },
+                        itemStyle: {
+                            color: color,
+                            borderWidth: 1,
+                            borderColor: '#ffffff'
+                        }
+                    }]
+                });
+            } else {
+                growthChart.setOption({
+                    title: {
+                        text: 'No data available\nAdd training records to see charts',
+                        left: 'center',
+                        top: 'middle',
+                        textStyle: {
+                            color: '#9ca3af',
+                            fontSize: 14
+                        }
+                    }
+                });
+            }
         }
 
         // Dashboard
@@ -1052,24 +1447,84 @@
             }
         }
 
-        // Training records
+        // Training records - unified view
         async function loadTraining() {
-            const response = await fetch(`/api/training?userId=${currentUser.id}`);
-            const sessions = await response.json();
+            const userId = currentUser.id;
+            
+            // Fetch both training and strength records
+            const [trainingResponse, strengthResponse] = await Promise.all([
+                fetch(`/api/training?userId=${userId}`),
+                fetch(`/api/strength?userId=${userId}`)
+            ]);
+            
+            const trainingSessions = await trainingResponse.json();
+            const strengthRecords = await strengthResponse.json();
+            
+            // Combine and sort by date (newest first)
+            const allRecords = [
+                ...trainingSessions.map(s => ({
+                    ...s,
+                    recordType: 'training'
+                })),
+                ...strengthRecords.map(s => ({
+                    ...s,
+                    recordType: 'strength'
+                }))
+            ].sort((a, b) => new Date(b.date) - new Date(a.date));
             
             const tbody = document.getElementById('trainingTableBody');
-            tbody.innerHTML = sessions.map(s => `
-                <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3">${s.date}</td>
-                    <td class="px-4 py-3">${s.type === 'water' ? 'Water' : s.type === 'ergometer' ? 'Ergometer' : s.type === 'strength' ? 'Strength' : 'Technique'}</td>
-                    <td class="px-4 py-3">${s.duration}</td>
-                    <td class="px-4 py-3">${s.distance || '-'}</td>
-                    <td class="px-4 py-3">${s.avg_power || '-'}</td>
-                    <td class="px-4 py-3">${s.avg_heart_rate || '-'}</td>
-                    <td class="px-4 py-3">${s.rating ? '★'.repeat(s.rating) : '-'}</td>
-                    <td class="px-4 py-3">${s.coach_feedback ? `<div class="feedback-box"><p>${s.coach_feedback}</p></div>` : '-'}</td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = allRecords.map(record => {
+                if (record.recordType === 'strength') {
+                    // Strength record display
+                    return `
+                        <tr class="hover:bg-gray-50 bg-pink-50">
+                            <td class="px-4 py-3 font-medium text-pink-700">${record.date}</td>
+                            <td class="px-4 py-3">
+                                <span class="inline-block px-2 py-1 bg-pink-100 text-pink-700 rounded text-xs font-medium">Strength</span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="font-medium text-gray-900">${record.exercise_name}</div>
+                                <div class="text-xs text-gray-500">${record.sets} sets × ${record.reps} reps × ${record.weight} kg</div>
+                            </td>
+                            <td class="px-4 py-3">-</td>
+                            <td class="px-4 py-3">-</td>
+                            <td class="px-4 py-3">-</td>
+                            <td class="px-4 py-3">${record.notes || '-'}</td>
+                            <td class="px-4 py-3">-</td>
+                        </tr>
+                    `;
+                } else {
+                    // Training record display
+                    return `
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3">${record.date}</td>
+                            <td class="px-4 py-3">
+                                <span class="inline-block px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">
+                                    ${record.type === 'water' ? 'Water' : record.type === 'ergometer' ? 'Ergometer' : record.type === 'strength' ? 'Strength' : 'Technique'}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="text-sm">${record.duration} min</div>
+                                ${record.distance ? `<div class="text-xs text-gray-500">${record.distance} m</div>` : ''}
+                            </td>
+                            <td class="px-4 py-3">${record.avg_power || '-'}</td>
+                            <td class="px-4 py-3">${record.avg_heart_rate || '-'}</td>
+                            <td class="px-4 py-3">${record.rating ? '★'.repeat(record.rating) : '-'}</td>
+                            <td class="px-4 py-3">${record.coach_feedback ? `<div class="feedback-box"><p>${record.coach_feedback}</p></div>` : '-'}</td>
+                            <td class="px-4 py-3">
+                                <div class="flex gap-2">
+                                    <button onclick="viewSessionDetails(${record.id})" class="px-3 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium hover:bg-purple-200 transition">
+                                        View Details
+                                    </button>
+                                    ${currentUser.role === 'coach' ? 
+                                        `<button onclick="editTraining(${record.id})" class="px-3 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium hover:bg-blue-200 transition">Edit</button>` : 
+                                        ''}
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
+            }).join('');
         }
 
         // Strength records
@@ -1190,56 +1645,243 @@
 
         // Load students for coaches
         async function loadStudents() {
-            if (currentUser.role !== 'coach') return;
+            if (currentUser.role !== 'coach') {
+                // Athletes: Load their coaches
+                loadCoaches();
+                return;
+            }
             
             try {
-                // Get all training records to find student IDs
-                const response = await fetch('/api/training/all');
-                const result = await response.json();
+                // Get coach's students from bindings
+                const response = await fetch(`/api/bindings?coachId=${currentUser.id}`);
+                const students = await response.json();
                 
-                // Handle both array and object responses
-                let allSessions = [];
-                if (Array.isArray(result)) {
-                    allSessions = result;
-                } else if (result.error) {
-                    console.log('Could not load students:', result.error);
-                    return;
-                }
-                
-                // Extract unique student IDs
-                const studentIds = [...new Set(allSessions.map(s => s.user_id))];
-                
-                // Get user names for all students
-                studentsList = [];
-                for (const userId of studentIds) {
-                    if (userId !== currentUser.id) {
-                        // Try to get user info, fallback to ID
-                        try {
-                            const userResponse = await fetch(`/api/auth/user?id=${userId}`);
-                            const userData = await userResponse.json();
-                            studentsList.push({
-                                id: userId,
-                                name: userData.name || userData.username || `Student ${userId}`
-                            });
-                        } catch {
-                            studentsList.push({
-                                id: userId,
-                                name: `Student ${userId}`
-                            });
-                        }
-                    }
+                const list = document.getElementById('studentsList');
+                if (students.length === 0) {
+                    list.innerHTML = '<p class="text-gray-500 text-center py-8">No students yet. Click "Add Student" to add your first student.</p>';
+                } else {
+                    list.innerHTML = students.map(s => `
+                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                            <div class="flex items-start justify-between mb-2">
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">${s.name}</h4>
+                                    <p class="text-xs text-gray-500">${s.username}</p>
+                                </div>
+                                <button onclick="removeStudent(${s.binding_id})" class="text-red-600 hover:text-red-700 text-sm font-medium">
+                                    Remove
+                                </button>
+                            </div>
+                            ${s.notes ? `<p class="text-sm text-gray-600 mt-2">${s.notes}</p>` : ''}
+                            ${s.phone ? `<p class="text-xs text-gray-500 mt-1">📞 ${s.phone}</p>` : ''}
+                            ${s.email ? `<p class="text-xs text-gray-500">📧 ${s.email}</p>` : ''}
+                        </div>
+                    `).join('');
                 }
             } catch (error) {
-                console.log('Could not load students:', error);
+                console.error('Error loading students:', error);
             }
+        }
+
+        // Load coaches for athletes
+        async function loadCoaches() {
+            try {
+                const response = await fetch(`/api/bindings?studentId=${currentUser.id}`);
+                const coaches = await response.json();
+                
+                const list = document.getElementById('coachesList');
+                if (coaches.length === 0) {
+                    list.innerHTML = '<p class="text-gray-500 text-center py-8">No coaches assigned yet. Contact your coach to add you.</p>';
+                } else {
+                    list.innerHTML = coaches.map(c => `
+                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                            <h4 class="font-semibold text-gray-900 mb-1">${c.name}</h4>
+                            <p class="text-xs text-gray-500 mb-2">${c.username}</p>
+                            ${c.notes ? `<p class="text-sm text-gray-600">${c.notes}</p>` : ''}
+                            ${c.phone ? `<p class="text-xs text-gray-500 mt-2">📞 ${c.phone}</p>` : ''}
+                            ${c.email ? `<p class="text-xs text-gray-500">📧 ${c.email}</p>` : ''}
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading coaches:', error);
+            }
+        }
+
+        // Show add student modal
+        async function showAddStudentModal() {
+            try {
+                // Get all athletes
+                const response = await fetch('/api/auth/user?'); // This needs to be modified to get all athletes
+                // For now, we'll use a different approach - get users from training records
+                const trainingResponse = await fetch('/api/training/all');
+                const sessions = await trainingResponse.json();
+                
+                // Get unique athlete IDs
+                const athleteIds = [...new Set(sessions.map(s => s.user_id))];
+                
+                // Get current students
+                const bindingsResponse = await fetch(`/api/bindings?coachId=${currentUser.id}`);
+                const currentStudents = await bindingsResponse.json();
+                const currentStudentIds = currentStudents.map(s => s.id);
+                
+                // Get all users
+                const allUsers = [];
+                for (const userId of athleteIds) {
+                    try {
+                        const userResponse = await fetch(`/api/auth/user?id=${userId}`);
+                        const userData = await userResponse.json();
+                        if (userData.role === 'athlete' && !currentStudentIds.includes(userData.id)) {
+                            allUsers.push(userData);
+                        }
+                    } catch {
+                        // Skip if error
+                    }
+                }
+                
+                const select = document.getElementById('newStudentId');
+                select.innerHTML = '<option value="">Select a student to add</option>' + 
+                    allUsers.map(u => `<option value="${u.id}">${u.name} (${u.username})</option>`).join('');
+                
+                document.getElementById('addStudentModal').classList.remove('hidden');
+            } catch (error) {
+                console.error('Error loading available students:', error);
+                alert('Could not load available students. Please try again.');
+            }
+        }
+
+        // Add student form submission
+        document.getElementById('addStudentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const data = {
+                coach_id: currentUser.id,
+                student_id: parseInt(document.getElementById('newStudentId').value),
+                notes: document.getElementById('newStudentNotes').value
+            };
+
+            const response = await fetch('/api/bindings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                closeModal('addStudentModal');
+                document.getElementById('addStudentForm').reset();
+                loadStudents();
+                alert(result.message || 'Student added successfully!');
+            } else {
+                const error = await response.json();
+                alert(error.error || 'Failed to add student');
+            }
+        });
+
+        // Remove student
+        async function removeStudent(bindingId) {
+            if (!confirm('Are you sure you want to remove this student?')) return;
+            
+            const response = await fetch(`/api/bindings?id=${bindingId}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                loadStudents();
+                alert('Student removed successfully!');
+            } else {
+                alert('Failed to remove student');
+            }
+        }
+
+        // Show profile modal
+        function showProfileModal() {
+            // Load current user data
+            fetch('/api/auth/user')
+                .then(response => response.json())
+                .then(user => {
+                    document.getElementById('profileUsername').value = user.username;
+                    document.getElementById('profileName').value = user.name || '';
+                    document.getElementById('profileEmail').value = user.email || '';
+                    document.getElementById('profilePhone').value = user.phone || '';
+                    document.getElementById('profileBirthDate').value = user.birth_date ? user.birth_date.split('T')[0] : '';
+                    document.getElementById('profileHeight').value = user.height || '';
+                    document.getElementById('profileWeight').value = user.weight || '';
+                });
+            
+            document.getElementById('profileModal').classList.remove('hidden');
+        }
+
+        // Profile form submission
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const data = {
+                name: document.getElementById('profileName').value,
+                email: document.getElementById('profileEmail').value,
+                phone: document.getElementById('profilePhone').value,
+                birth_date: document.getElementById('profileBirthDate').value,
+                height: parseFloat(document.getElementById('profileHeight').value) || null,
+                weight: parseFloat(document.getElementById('profileWeight').value) || null
+            };
+
+            const response = await fetch(`/api/auth/user?id=${currentUser.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                // Update current user data
+                currentUser = { ...currentUser, ...result.user };
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                document.getElementById('userName').textContent = currentUser.name;
+                
+                closeModal('profileModal');
+                alert('Profile updated successfully!');
+            } else {
+                const error = await response.json();
+                alert(error.error || 'Failed to update profile');
+            }
+        });
+
+        // Edit training record
+        function editTraining(sessionId) {
+            // Fetch the training record
+            fetch(`/api/training/session/${sessionId}`)
+                .then(response => response.json())
+                .then(session => {
+                    // Populate the modal with existing data
+                    document.getElementById('trainingDate').value = session.date;
+                    document.getElementById('trainingType').value = session.type;
+                    document.getElementById('trainingDuration').value = session.duration;
+                    document.getElementById('trainingDistance').value = session.distance || '';
+                    document.getElementById('trainingSplit').value = session.split_time || '';
+                    document.getElementById('trainingPower').value = session.avg_power || '';
+                    document.getElementById('trainingAvgHR').value = session.avg_heart_rate || '';
+                    document.getElementById('trainingMaxHR').value = session.max_heart_rate || '';
+                    document.getElementById('trainingSR').value = session.stroke_rate || '';
+                    document.getElementById('trainingNotes').value = session.notes || '';
+                    
+                    // Store session ID for update
+                    document.getElementById('trainingForm').dataset.sessionId = sessionId;
+                    
+                    // Change modal title to indicate editing
+                    document.querySelector('#addTrainingModal h3').textContent = 'Edit Training Record';
+                    
+                    // Show the modal
+                    document.getElementById('addTrainingModal').classList.remove('hidden');
+                });
         }
 
         // Form submissions
         document.getElementById('trainingForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const selectedStudentId = document.getElementById('trainingStudentId').value;
+            const sessionId = document.getElementById('trainingForm').dataset.sessionId;
             
             const data = {
+                coach_id: currentUser.id,
                 user_id: selectedStudentId || currentUser.id,
                 date: document.getElementById('trainingDate').value,
                 type: document.getElementById('trainingType').value,
@@ -1255,8 +1897,12 @@
 
             console.log('Submitting training data:', data);
 
-            const response = await fetch('/api/training', {
-                method: 'POST',
+            // Use PUT if editing, POST if adding new
+            const method = sessionId ? 'PUT' : 'POST';
+            const url = sessionId ? `/api/training?id=${sessionId}` : '/api/training';
+
+            const response = await fetch(url, {
+                method: method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
@@ -1266,12 +1912,14 @@
                 console.log('Training record saved:', result);
                 closeModal('addTrainingModal');
                 document.getElementById('trainingForm').reset();
+                delete document.getElementById('trainingForm').dataset.sessionId;
+                document.querySelector('#addTrainingModal h3').textContent = 'Add Training Record';
                 
                 // Wait a moment then reload data
                 setTimeout(() => {
                     loadDashboard();
                     loadTraining();
-                    alert('Training record added successfully!');
+                    alert(sessionId ? 'Training record updated successfully!' : 'Training record added successfully!');
                 }, 300);
             } else {
                 console.error('Failed to save training record');
@@ -1311,11 +1959,354 @@
         window.addEventListener('resize', () => {
             if (powerChart) powerChart.resize();
             if (heartRateChart) heartRateChart.resize();
+            if (growthChart) growthChart.resize();
         });
         
         // Initialize charts when ECharts is loaded
         window.addEventListener('DOMContentLoaded', () => {
             console.log('DOM loaded, ECharts available:', typeof echarts !== 'undefined');
+        });
+
+        // Session Details Functions
+        let sessionDetailChart = null;
+        let powerZonesChart = null;
+        let hrZonesChart = null;
+
+        async function viewSessionDetails(sessionId) {
+            try {
+                // Fetch the training session
+                const response = await fetch(`/api/training?id=${sessionId}`);
+                const session = await response.json();
+                
+                if (!session || session.error) {
+                    alert('Failed to load session details');
+                    return;
+                }
+                
+                // Populate basic information
+                document.getElementById('detailDate').textContent = session.date;
+                document.getElementById('detailType').textContent = session.type === 'water' ? 'Water' : session.type === 'ergometer' ? 'Ergometer' : session.type === 'strength' ? 'Strength' : 'Technique';
+                document.getElementById('detailDuration').textContent = session.duration + ' min';
+                
+                // Populate performance metrics
+                document.getElementById('detailDistance').textContent = session.distance ? session.distance + ' m' : '-';
+                document.getElementById('detailSplit').textContent = session.split_time ? session.split_time + ' s/500m' : '-';
+                document.getElementById('detailPower').textContent = session.avg_power ? session.avg_power + ' W' : '-';
+                document.getElementById('detailAvgHR').textContent = session.avg_heart_rate ? session.avg_heart_rate + ' BPM' : '-';
+                document.getElementById('detailMaxHR').textContent = session.max_heart_rate ? session.max_heart_rate + ' BPM' : '-';
+                document.getElementById('detailStrokeRate').textContent = session.stroke_rate ? session.stroke_rate + ' spm' : '-';
+                
+                // Populate notes
+                document.getElementById('detailNotes').textContent = session.notes || 'No notes';
+                
+                // Populate coach feedback
+                document.getElementById('detailFeedback').textContent = session.coach_feedback || 'No feedback yet';
+                
+                // Check if video exists
+                const videoSection = document.getElementById('detailVideoSection');
+                const videoElement = document.getElementById('detailVideo');
+                if (session.video_url) {
+                    videoSection.classList.remove('hidden');
+                    videoElement.src = session.video_url;
+                } else {
+                    videoSection.classList.add('hidden');
+                }
+                
+                // Show the modal
+                document.getElementById('sessionDetailsModal').classList.remove('hidden');
+                
+                // Initialize charts after modal is visible
+                setTimeout(() => {
+                    initSessionDetailCharts(session);
+                }, 100);
+                
+            } catch (error) {
+                console.error('Error loading session details:', error);
+                alert('Failed to load session details');
+            }
+        }
+
+        function initSessionDetailCharts(session) {
+            // Performance Chart
+            const detailChartContainer = document.getElementById('sessionDetailChart');
+            if (sessionDetailChart) {
+                sessionDetailChart.dispose();
+            }
+            sessionDetailChart = echarts.init(detailChartContainer);
+            
+            // Generate simulated data points for the session
+            const dataPoints = 20;
+            const timestamps = Array.from({ length: dataPoints }, (_, i) => `${(i * (session.duration / dataPoints)).toFixed(0)}m`);
+            
+            const powerData = Array.from({ length: dataPoints }, () => {
+                const base = session.avg_power || 150;
+                const variance = base * 0.2;
+                return Math.round(base + (Math.random() - 0.5) * variance);
+            });
+            
+            const hrData = Array.from({ length: dataPoints }, () => {
+                const base = session.avg_heart_rate || 140;
+                const variance = base * 0.1;
+                return Math.round(base + (Math.random() - 0.5) * variance);
+            });
+            
+            sessionDetailChart.setOption({
+                tooltip: { trigger: 'axis' },
+                legend: { data: ['Power (W)', 'Heart Rate (BPM)'] },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: timestamps,
+                    name: 'Time (min)',
+                    axisLine: { lineStyle: { color: '#e5e7eb' } },
+                    axisLabel: { color: '#6b7280' }
+                },
+                yAxis: [
+                    {
+                        type: 'value',
+                        name: 'Power (W)',
+                        position: 'left',
+                        axisLine: { lineStyle: { color: '#e5e7eb' } },
+                        axisLabel: { color: '#6b7280' },
+                        splitLine: { lineStyle: { color: '#f3f4f6' } }
+                    },
+                    {
+                        type: 'value',
+                        name: 'HR (BPM)',
+                        position: 'right',
+                        axisLine: { lineStyle: { color: '#e5e7eb' } },
+                        axisLabel: { color: '#6b7280' },
+                        splitLine: { show: false }
+                    }
+                ],
+                series: [
+                    {
+                        name: 'Power (W)',
+                        type: 'line',
+                        smooth: true,
+                        data: powerData,
+                        lineStyle: { width: 2, color: '#111827' },
+                        areaStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: 'rgba(17, 24, 39, 0.2)' },
+                                { offset: 1, color: 'rgba(17, 24, 39, 0.02)' }
+                            ])
+                        }
+                    },
+                    {
+                        name: 'Heart Rate (BPM)',
+                        type: 'line',
+                        smooth: true,
+                        yAxisIndex: 1,
+                        data: hrData,
+                        lineStyle: { width: 2, color: '#dc2626' },
+                        areaStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: 'rgba(220, 38, 38, 0.2)' },
+                                { offset: 1, color: 'rgba(220, 38, 38, 0.02)' }
+                            ])
+                        }
+                    }
+                ]
+            });
+            
+            // Power Zones Chart
+            const powerZonesContainer = document.getElementById('powerZonesChart');
+            if (powerZonesChart) {
+                powerZonesChart.dispose();
+            }
+            powerZonesChart = echarts.init(powerZonesContainer);
+            
+            const avgPower = session.avg_power || 150;
+            const powerZones = [
+                { name: 'Zone 1 (Recovery)', value: Math.max(0, avgPower * 0.6), max: avgPower * 0.6 },
+                { name: 'Zone 2 (Aerobic)', value: Math.max(0, avgPower * 0.7), max: avgPower * 0.7 },
+                { name: 'Zone 3 (Tempo)', value: Math.max(0, avgPower * 0.8), max: avgPower * 0.8 },
+                { name: 'Zone 4 (Threshold)', value: Math.max(0, avgPower * 0.9), max: avgPower * 0.9 },
+                { name: 'Zone 5 (VO2 Max)', value: avgPower, max: avgPower * 1.1 }
+            ];
+            
+            powerZonesChart.setOption({
+                tooltip: { trigger: 'item' },
+                series: [{
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    avoidLabelOverlap: false,
+                    itemStyle: {
+                        borderRadius: 10,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    },
+                    label: {
+                        show: true,
+                        formatter: '{b}\n{d}%'
+                    },
+                    data: powerZones.map(zone => ({
+                        name: zone.name,
+                        value: Math.random() * 20 + 10
+                    }))
+                }]
+            });
+            
+            // Heart Rate Zones Chart
+            const hrZonesContainer = document.getElementById('hrZonesChart');
+            if (hrZonesChart) {
+                hrZonesChart.dispose();
+            }
+            hrZonesChart = echarts.init(hrZonesContainer);
+            
+            const avgHR = session.avg_heart_rate || 140;
+            const maxHR = session.max_heart_rate || (avgHR * 1.2);
+            const hrZones = [
+                { name: 'Zone 1 (50-60%)', value: Math.random() * 15 + 10, color: '#a5f3fc' },
+                { name: 'Zone 2 (60-70%)', value: Math.random() * 20 + 15, color: '#67e8f9' },
+                { name: 'Zone 3 (70-80%)', value: Math.random() * 25 + 20, color: '#22d3ee' },
+                { name: 'Zone 4 (80-90%)', value: Math.random() * 20 + 15, color: '#06b6d4' },
+                { name: 'Zone 5 (90-100%)', value: Math.random() * 15 + 10, color: '#0891b2' }
+            ];
+            
+            hrZonesChart.setOption({
+                tooltip: { trigger: 'item' },
+                series: [{
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    avoidLabelOverlap: false,
+                    itemStyle: {
+                        borderRadius: 10,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    },
+                    label: {
+                        show: true,
+                        formatter: '{b}\n{d}%'
+                    },
+                    data: hrZones
+                }]
+            });
+        }
+
+        // Video Upload Functions
+        function showVideoUploadModal() {
+            // Load training sessions for the current user (or students for coaches)
+            if (currentUser.role === 'coach') {
+                const selector = document.getElementById('videoStudentSelector');
+                const select = document.getElementById('videoSessionId');
+                selector.classList.remove('hidden');
+                
+                // Load sessions for all students
+                fetch(`/api/training/all`)
+                    .then(response => response.json())
+                    .then(sessions => {
+                        const studentSessions = sessions.filter(s => studentsList.some(st => st.id === s.user_id));
+                        select.innerHTML = '<option value="">Select a training session</option>' + 
+                            studentSessions.map(s => `<option value="${s.id}">${s.date} - ${s.type} (${s.duration} min)</option>`).join('');
+                    });
+            } else {
+                document.getElementById('videoStudentSelector').classList.add('hidden');
+                fetch(`/api/training?userId=${currentUser.id}`)
+                    .then(response => response.json())
+                    .then(sessions => {
+                        const select = document.getElementById('videoSessionId');
+                        select.innerHTML = '<option value="">Select a training session</option>' + 
+                            sessions.map(s => `<option value="${s.id}">${s.date} - ${s.type} (${s.duration} min)</option>`).join('');
+                    });
+            }
+            
+            // Reset form
+            document.getElementById('videoUploadForm').reset();
+            document.getElementById('uploadProgress').classList.add('hidden');
+            document.getElementById('progressBar').style.width = '0%';
+            
+            document.getElementById('videoUploadModal').classList.remove('hidden');
+        }
+
+        document.getElementById('videoUploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('videoFile');
+            const sessionId = document.getElementById('videoSessionId').value;
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a video file');
+                return;
+            }
+            
+            // Check file size (100MB limit)
+            if (file.size > 100 * 1024 * 1024) {
+                alert('Video file is too large. Maximum size is 100MB.');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('video', file);
+            formData.append('userId', currentUser.id);
+            
+            if (sessionId) {
+                formData.append('sessionId', sessionId);
+            }
+            
+            // Show progress
+            const progressDiv = document.getElementById('uploadProgress');
+            const progressBar = document.getElementById('progressBar');
+            const uploadStatus = document.getElementById('uploadStatus');
+            const uploadBtn = document.getElementById('uploadVideoBtn');
+            
+            progressDiv.classList.remove('hidden');
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'Uploading...';
+            
+            try {
+                // Simulate progress (since we can't track real progress with basic fetch)
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    progress += 10;
+                    if (progress > 90) progress = 90;
+                    progressBar.style.width = `${progress}%`;
+                    uploadStatus.textContent = `Uploading... ${progress}%`;
+                }, 500);
+                
+                const response = await fetch('/api/video-upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                clearInterval(progressInterval);
+                progressBar.style.width = '100%';
+                uploadStatus.textContent = 'Upload complete!';
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    setTimeout(() => {
+                        closeModal('videoUploadModal');
+                        loadTraining();
+                        alert('Video uploaded successfully!');
+                        
+                        // Reset progress
+                        progressDiv.classList.add('hidden');
+                        progressBar.style.width = '0%';
+                        uploadBtn.disabled = false;
+                        uploadBtn.textContent = 'Upload Video';
+                    }, 1000);
+                } else {
+                    throw new Error(result.error || 'Upload failed');
+                }
+            } catch (error) {
+                console.error('Video upload error:', error);
+                alert('Failed to upload video: ' + error.message);
+                
+                // Reset progress
+                progressDiv.classList.add('hidden');
+                progressBar.style.width = '0%';
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = 'Upload Video';
+            }
         });
     </script>
 </body>

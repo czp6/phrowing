@@ -5,3 +5,7 @@ pages_build_output_dir = "public"
 binding = "DB" # This refers to 'context.env.DB' in your code
 database_name = "rowing-db"
 database_id = "ea852d86-deb1-441c-b65e-e6a73136075b"
+
+[[r2_buckets]]
+binding = "R2" # This refers to 'context.env.R2' in your code
+bucket_name = "rowing-videos"

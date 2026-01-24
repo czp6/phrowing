@@ -7,6 +7,10 @@ CREATE TABLE users (
   role TEXT NOT NULL CHECK(role IN ('athlete', 'coach')),
   name TEXT NOT NULL,
   email TEXT,
+  phone TEXT,
+  birth_date TEXT,
+  height REAL,
+  weight REAL,
   created_at INTEGER DEFAULT (strftime('%s', 'now')),
   last_login INTEGER
 );
@@ -28,6 +32,8 @@ CREATE TABLE training_sessions (
   notes TEXT,
   coach_feedback TEXT,
   rating INTEGER CHECK(rating BETWEEN 1 AND 5),
+  video_url TEXT,
+  video_thumbnail_url TEXT,
   created_at INTEGER DEFAULT (strftime('%s', 'now')),
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
@@ -74,6 +80,21 @@ CREATE TABLE plan_details (
   duration INTEGER,
   intensity INTEGER CHECK(intensity BETWEEN 1 AND 5),
   FOREIGN KEY (plan_id) REFERENCES training_plans(id) ON DELETE CASCADE
+);
+
+-- Coach-student bindings
+DROP TABLE IF EXISTS coach_student_bindings;
+CREATE TABLE coach_student_bindings (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  coach_id INTEGER NOT NULL,
+  student_id INTEGER NOT NULL,
+  status TEXT DEFAULT('active') CHECK(status IN ('active', 'inactive')),
+  notes TEXT,
+  created_at INTEGER DEFAULT (strftime('%s', 'now')),
+  updated_at INTEGER DEFAULT (strftime('%s', 'now')),
+  FOREIGN KEY (coach_id) REFERENCES users(id),
+  FOREIGN KEY (student_id) REFERENCES users(id),
+  UNIQUE(coach_id, student_id)
 );
 
 -- Technique library

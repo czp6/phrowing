@@ -1,13 +1,13 @@
 export async function onRequestGet(context) {
   const url = new URL(context.request.url);
-  const category = url.searchParams.get('category') || 'daily_distance';
+  const category = url.searchParams.get('category') || 'weekly_distance';
   
   let query = '';
   let orderBy = '';
   
   // Calculate leaderboard from training sessions
   switch(category) {
-    case 'daily_distance':
+    case 'weekly_distance':
       query = `
         SELECT 
           ts.user_id,
@@ -15,7 +15,7 @@ export async function onRequestGet(context) {
           SUM(ts.distance) as value
         FROM training_sessions ts
         JOIN users u ON ts.user_id = u.id
-        WHERE ts.date = date('now')
+        WHERE ts.date >= date('now', 'weekday 0', '-7 days')
         GROUP BY ts.user_id
         ORDER BY value DESC
         LIMIT 10
@@ -85,7 +85,7 @@ export async function onRequestGet(context) {
           SUM(ts.distance) as value
         FROM training_sessions ts
         JOIN users u ON ts.user_id = u.id
-        WHERE ts.date = date('now')
+        WHERE ts.date >= date('now', 'weekday 0', '-7 days')
         GROUP BY ts.user_id
         ORDER BY value DESC
         LIMIT 10
